@@ -180,7 +180,7 @@ def train_and_log(
             mlflow.log_artifact(str(roc_path), artifact_path="plots")
             mlflow.log_artifact(str(cm_path), artifact_path="plots")
 
-        mlflow.sklearn.log_model(sk_model=best,artifact_path="model",serialization_format="pickle",)
+        mlflow.sklearn.log_model(sk_model=best, artifact_path="model", serialization_format="pickle", )
 
         run_id = mlflow.active_run().info.run_id
         logger.info(
