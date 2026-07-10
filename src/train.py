@@ -43,6 +43,7 @@ from xgboost import XGBClassifier
 from src.config import (
     MLFLOW_EXPERIMENT_NAME,
     MLFLOW_MODEL_NAME,
+    MLFLOW_TRACKING_URI,
     MODEL_PATH,
     RANDOM_STATE,
 )
@@ -179,7 +180,7 @@ def train_and_log(
             mlflow.log_artifact(str(roc_path), artifact_path="plots")
             mlflow.log_artifact(str(cm_path), artifact_path="plots")
 
-        mlflow.sklearn.log_model(best, artifact_path="model")
+        mlflow.sklearn.log_model(sk_model=best,artifact_path="model",serialization_format="pickle",)
 
         run_id = mlflow.active_run().info.run_id
         logger.info(
@@ -204,9 +205,10 @@ def register_best_model(results: List[Dict[str, Any]]) -> None:
 
     with mlflow.start_run(run_name=f"register__{best['model_name']}"):
         mlflow.sklearn.log_model(
-            best["pipeline"],
+            sk_model=best["pipeline"],
             artifact_path="model",
             registered_model_name=MLFLOW_MODEL_NAME,
+            serialization_format="pickle",
         )
 
 
@@ -216,6 +218,7 @@ def main() -> None:
     logging.basicConfig(
         level=logging.INFO, format="%(levelname)s  %(name)s  %(message)s"
     )
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
     data = prepare_data()

@@ -33,6 +33,7 @@ TEST_SIZE = 0.20
 # ── MLflow ────────────────────────────────────────────────────────────────────
 MLFLOW_EXPERIMENT_NAME = "heart-disease-classification"
 MLFLOW_MODEL_NAME = "heart-disease-classifier"
+MLFLOW_TRACKING_URI = "sqlite:///mlflow.db"
 
 # ── Serialised model artifact ─────────────────────────────────────────────────
 MODEL_PATH = MODELS_DIR / "best_model.joblib"
