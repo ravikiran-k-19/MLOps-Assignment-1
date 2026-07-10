@@ -24,7 +24,6 @@ import joblib
 import matplotlib.pyplot as plt
 import mlflow
 import mlflow.sklearn
-import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -47,7 +46,7 @@ from src.config import (
     MODEL_PATH,
     RANDOM_STATE,
 )
-from src.data_preparation import build_preprocessor, prepare_data
+from src.data_preparation import prepare_data
 
 try:
     import truststore
