@@ -6,25 +6,35 @@ on:
     types:
       - completed
     branches: [main]
+  workflow_dispatch:   # allows manual trigger from the Actions tab
 
 jobs:
   deploy:
     name: Deploy to Kubernetes
     runs-on: self-hosted
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create empty models directory (required by Dockerfile COPY)
-        run: mkdir -p models
+        shell: pwsh
+        run: |
+          if (!(Test-Path -Path "models")) {
+            New-Item -ItemType Directory -Path "models" | Out-Null
+            Write-Host "Created models directory"
+          } else {
+            Write-Host "models directory already exists, skipping"
+          }
 
       - name: Build Docker image
+        shell: pwsh
         run: |
           docker build -t heart-disease-api:latest .
 
       - name: Deploy to Kubernetes
+        shell: pwsh
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
@@ -33,10 +43,12 @@ jobs:
           kubectl rollout restart deployment heart-disease-api
 
       - name: Verify rollout
+        shell: pwsh
         run: |
           kubectl rollout status deployment heart-disease-api --timeout=90s
 
       - name: Show running pods
+        shell: pwsh
         run: |
           kubectl get pods
           kubectl get services
