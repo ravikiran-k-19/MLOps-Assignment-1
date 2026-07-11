@@ -6,7 +6,7 @@ on:
     types:
       - completed
     branches: [main]
-  workflow_dispatch:   # allows manual trigger from the Actions tab
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create empty models directory (required by Dockerfile COPY)
-        shell: pwsh
+        shell: powershell
         run: |
           if (!(Test-Path -Path "models")) {
             New-Item -ItemType Directory -Path "models" | Out-Null
@@ -29,12 +29,12 @@ jobs:
           }
 
       - name: Build Docker image
-        shell: pwsh
+        shell: powershell
         run: |
           docker build -t heart-disease-api:latest .
 
       - name: Deploy to Kubernetes
-        shell: pwsh
+        shell: powershell
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
@@ -43,12 +43,12 @@ jobs:
           kubectl rollout restart deployment heart-disease-api
 
       - name: Verify rollout
-        shell: pwsh
+        shell: powershell
         run: |
           kubectl rollout status deployment heart-disease-api --timeout=90s
 
       - name: Show running pods
-        shell: pwsh
+        shell: powershell
         run: |
           kubectl get pods
           kubectl get services
