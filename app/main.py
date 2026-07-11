@@ -33,6 +33,10 @@ from pythonjsonlogger import jsonlogger
 from app.schemas import PatientFeatures, PredictionResponse
 from src.config import CATEGORICAL_FEATURES, MODELS_DIR, NUMERIC_FEATURES
 
+from prometheus_client import Gauge
+
+MODEL_LOADED = Gauge("model_loaded", "Whether the model is currently loaded (1=yes, 0=no)")
+
 # ── Structured JSON logging ───────────────────────────────────────────────────
 logger = logging.getLogger("heart_disease_api")
 _handler = logging.StreamHandler()
@@ -71,8 +75,10 @@ async def lifespan(app: FastAPI):
     model_path = MODELS_DIR / "best_model.joblib"
     if model_path.exists():
         _model = joblib.load(model_path)
+        MODEL_LOADED.set(1)
         logger.info("model_loaded", extra={"path": str(model_path), "version": MODEL_VERSION})
     else:
+        MODEL_LOADED.set(0)
         logger.warning(
             "model_file_missing",
             extra={"path": str(model_path), "hint": "run `python -m src.train` first"},

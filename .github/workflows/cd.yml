@@ -1,0 +1,42 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: self-hosted
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create empty models directory (required by Dockerfile COPY)
+        run: mkdir -p models
+
+      - name: Build Docker image
+        run: |
+          docker build -t heart-disease-api:latest .
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/prometheus-deployment.yaml
+          kubectl apply -f k8s/grafana-deployment.yaml
+          kubectl rollout restart deployment heart-disease-api
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment heart-disease-api --timeout=90s
+
+      - name: Show running pods
+        run: |
+          kubectl get pods
+          kubectl get services

@@ -1,0 +1,593 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource
+data:
+  prometheus.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'Default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard
+data:
+  heart-disease-dashboard.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Monitor requests, latency, errors, and model predictions for the Heart Disease API",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Requests/sec",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "expr": "sum(rate(api_request_total[5m])) by (endpoint)",
+              "refId": "A",
+              "legendFormat": "{{endpoint}}"
+            }
+          ],
+          "title": "Request Rate by Endpoint (5m avg)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.001
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.01
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "values": false,
+              "calcs": ["lastNotNull"],
+              "fields": ""
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "text": {}
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "expr": "sum(rate(api_request_total{status=~\"5..\"}[5m]))",
+              "refId": "A",
+              "legendFormat": "5xx errors/sec"
+            }
+          ],
+          "title": "Error Rate (5xx, 5m avg)",
+          "type": "gauge"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Latency (seconds)",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "id": 3,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(api_request_latency_seconds_bucket[5m])) by (le, endpoint))",
+              "refId": "A",
+              "legendFormat": "p95 {{endpoint}}"
+            }
+          ],
+          "title": "P95 Latency by Endpoint (5m)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                }
+              },
+              "mappings": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "id": 4,
+          "options": {
+            "displayLabels": ["percent"],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "values": ["value", "percent"]
+            },
+            "pieType": "pie",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "expr": "sum(rate(prediction_total[1h])) by (result)",
+              "refId": "A",
+              "legendFormat": "result={{result}}"
+            }
+          ],
+          "title": "Prediction Distribution (1h, drift signal)",
+          "type": "piechart"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "red",
+                      "text": "Not Loaded"
+                    },
+                    "1": {
+                      "color": "green",
+                      "text": "Loaded"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 6,
+            "x": 0,
+            "y": 16
+          },
+          "id": 5,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "values": false,
+              "calcs": ["lastNotNull"],
+              "fields": ""
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "expr": "model_loaded",
+              "refId": "A"
+            }
+          ],
+          "title": "Model Status",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 6,
+            "x": 6,
+            "y": 16
+          },
+          "id": 6,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "values": false,
+              "calcs": ["lastNotNull"],
+              "fields": ""
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "expr": "sum(api_request_total)",
+              "refId": "A"
+            }
+          ],
+          "title": "Total Requests (all-time)",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 6,
+            "x": 12,
+            "y": 16
+          },
+          "id": 7,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "values": false,
+              "calcs": ["lastNotNull"],
+              "fields": ""
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "expr": "sum(prediction_total)",
+              "refId": "A"
+            }
+          ],
+          "title": "Total Predictions (all-time)",
+          "type": "stat"
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["heart-disease", "mlops", "prediction"],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Heart Disease Prediction API",
+      "uid": "heart-disease-api-1",
+      "version": 1
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SECURITY_ADMIN_USER
+          value: admin
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: admin
+        - name: GF_USERS_ALLOW_SIGN_UP
+          value: "false"
+        volumeMounts:
+        - name: storage
+          mountPath: /var/lib/grafana
+        - name: datasources
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: dashboards-provider
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: dashboards
+          mountPath: /var/lib/grafana/dashboards
+      volumes:
+      - name: storage
+        emptyDir: {}
+      - name: datasources
+        configMap:
+          name: grafana-datasource
+      - name: dashboards-provider
+        configMap:
+          name: grafana-dashboard-provider
+      - name: dashboards
+        configMap:
+          name: grafana-dashboard
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+spec:
+  selector:
+    app: grafana
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: LoadBalancer
