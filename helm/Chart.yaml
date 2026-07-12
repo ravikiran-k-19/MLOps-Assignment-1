@@ -1,0 +1,6 @@
+apiVersion: v2
+name: heart-disease-api
+description: Helm chart for Heart Disease Prediction FastAPI service
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

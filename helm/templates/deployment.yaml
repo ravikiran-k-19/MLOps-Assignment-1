@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+name: {{ include "heart-disease-api.fullname" . }}
+spec:
+replicas: {{ .Values.replicaCount }}
+selector:
+matchLabels:
+app: {{ include "heart-disease-api.name" . }}
+template:
+metadata:
+labels:
+app: {{ include "heart-disease-api.name" . }}
+annotations:
+prometheus.io/scrape: "true"
+prometheus.io/path: "{{ .Values.prometheus.path }}"
+prometheus.io/port: "{{ .Values.prometheus.port }}"
+spec:
+containers:
+  name: heart-disease-api
+image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+imagePullPolicy: {{ .Values.image.pullPolicy }}
+ports:
+  containerPort: 8000
+resources:
+{{- toYaml .Values.resources | nindent 12 }}
