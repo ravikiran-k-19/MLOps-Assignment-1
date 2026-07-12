@@ -117,7 +117,7 @@ pytest tests/ -v --cov=src --cov=app --cov-report=term-missing
 ```
 
 ### MLOps Architecture
-![Local Image](./docs/architecture.png)
+![Local Image](./docs/Architecture.png)
 
 
 ### Author
