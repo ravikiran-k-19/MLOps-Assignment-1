@@ -103,7 +103,7 @@ What happens:
 ## 5. Run the Prediction API locally (Task 6)
 
 ```bash
-PYTHONPATH=. uvicorn app.main:app --reload --port 8000
+$env:PYTHONPATH="."; uvicorn app.main:app --reload --port 8000
 ```
 
 **API docs (Swagger UI):** http://localhost:8000/docs
@@ -130,34 +130,12 @@ Your API already exposes these custom metrics at `http://localhost:8000/metrics`
 - `prediction_total` — total predictions by result class (0 or 1)
 - `model_loaded` — gauge indicating if model is loaded (requires code addition below)
 
-**Add MODEL_LOADED gauge to `app/main.py`:**
-
-After the other Prometheus imports, add:
-```python
-from prometheus_client import Gauge
-
-MODEL_LOADED = Gauge("model_loaded", "Whether the model is currently loaded (1=yes, 0=no)")
-```
-
-In the `lifespan()` function, set the gauge when the model loads:
-```python
-if model_path.exists():
-    _model = joblib.load(model_path)
-    MODEL_LOADED.set(1)  # ← Add this line
-    logger.info(...)
-else:
-    MODEL_LOADED.set(0)  # ← Add this line
-    logger.warning(...)
-```
-
-This enables the "Model Status" panel in the Grafana dashboard (green = loaded, red = not loaded).
-
 ---
 
 ## 6. Run Tests (Task 5 — CI/CD)
 
 ```bash
-PYTHONPATH=. pytest tests/ -v --cov=src --cov=app --cov-report=term-missing
+$env:PYTHONPATH="."; pytest tests/ -v --cov=src --cov=app --cov-report=term-missing
 ```
 
 Lint:
@@ -172,16 +150,12 @@ flake8 src/ app/ tests/ --max-line-length=100
 ```bash
 docker build -t heart-disease-api:latest .
 
-docker run -p 8000:8000 \
-  -v $(pwd)/models:/app/models \
-  heart-disease-api:latest
+docker run -p 8000:8000 -v $(pwd)/models:/app/models heart-disease-api:latest
 ```
 
 Windows PowerShell:
 ```powershell
-docker run -p 8000:8000 `
-  -v "${PWD}/models:/app/models" `
-  heart-disease-api:latest
+docker run -p 8000:8000 -v "${PWD}/models:/app/models" heart-disease-api:latest
 ```
 
 ---
